@@ -1,0 +1,100 @@
+================================================================================
+INDUSTRIAL PREDICTIVE MAINTENANCE SYSTEM - MODEL EVALUATION REPORT
+================================================================================
+Dataset Path      : D:\IOT projects\Industrial_Predictive_Maintenance\ai_ml\data\industrial_sensor_dataset.csv
+Total Samples     : 6,000
+Random Seed       : 42
+Train/Test Split  : 80% Train (4,800) / 20% Test (1,200) Stratified
+Features Utilized : temperature, humidity, accel_x, accel_y, accel_z, total_accel, vibration_mag, radial_accel, axial_accel_dev, radial_axial_ratio, temp_humidity_ratio, thermal_mechanical_stress
+
+--------------------------------------------------------------------------------
+1. DATASET AUDIT & HEALTH CHECK
+--------------------------------------------------------------------------------
+- Missing Values               : 0
+- Duplicate Rows               : 0
+- Max Total Accel Discrepancy  : 0.0105 m/s² (Due to 2-decimal CSV rounding)
+- Max Vibration Mag Discrepancy: 0.0067 m/s²
+- Class Distribution:
+    * NORMAL   : 3600 samples (60.0%)
+    * WARNING  : 1500 samples (25.0%)
+    * CRITICAL : 900 samples (15.0%)
+
+Physical Limitations Documented:
+  - The feature 'vibration_mag' is calculated as |total_accel - 9.80665|. This is a scalar
+    magnitude proxy capturing net kinematic deviations from 1g. It is NOT a full
+    quaternion/orientation-compensated dynamic vibration vector.
+  - While acceleration and temperature distributions cleanly separate the conditions,
+    sensor noise around boundary thresholds (e.g. 2.5 m/s² and 45°C) produces realistic
+    transitional overlap between NORMAL and WARNING.
+
+--------------------------------------------------------------------------------
+2. SUPERVISED MODEL: RANDOM FOREST CLASSIFIER
+--------------------------------------------------------------------------------
+Architecture:
+  - Estimators   : 100 trees
+  - Max Depth    : 12
+  - Target Classes: ['NORMAL', 'WARNING', 'CRITICAL']
+
+Test Performance (1,200 Held-Out Samples):
+  - Accuracy          : 99.75%
+  - Macro Precision   : 99.67%
+  - Macro Recall      : 99.44%
+  - Macro F1-Score    : 99.55%
+  - Weighted F1-Score : 99.75%
+
+Classification Report:
+              precision    recall  f1-score   support
+
+      NORMAL     1.0000    1.0000    1.0000       720
+     WARNING     0.9901    1.0000    0.9950       300
+    CRITICAL     1.0000    0.9833    0.9916       180
+
+    accuracy                         0.9975      1200
+   macro avg     0.9967    0.9944    0.9955      1200
+weighted avg     0.9975    0.9975    0.9975      1200
+
+
+Confusion Matrix:
+                    Predicted NORMAL  Predicted WARNING  Predicted CRITICAL
+  Actual NORMAL   :       720               0                   0              
+  Actual WARNING  :       0                 300                 0              
+  Actual CRITICAL :       0                 3                   177            
+
+Top Feature Importances:
+  - temp_humidity_ratio      : 0.2210
+  - humidity                 : 0.1951
+  - temperature              : 0.1638
+  - radial_axial_ratio       : 0.1452
+  - radial_accel             : 0.1422
+  - thermal_mechanical_stress: 0.0549
+  - total_accel              : 0.0331
+  - vibration_mag            : 0.0201
+  - accel_y                  : 0.0099
+  - accel_x                  : 0.0088
+  - axial_accel_dev          : 0.0034
+  - accel_z                  : 0.0025
+
+--------------------------------------------------------------------------------
+3. UNSUPERVISED BASELINE: ISOLATION FOREST
+--------------------------------------------------------------------------------
+Methodology:
+  - Trained exclusively on 2,880 NORMAL (healthy baseline) samples.
+  - Contamination Parameter: 0.02 (assumes ~2% natural noise/sensor artifacts).
+  - Evaluated on all 1,200 test samples (Binary: NORMAL=1, ANOMALY=-1).
+
+Test Performance on Held-Out Set:
+  - Binary Accuracy         : 92.00%
+  - Anomaly Precision (-1)  : 95.93%
+  - Anomaly Recall (-1)     : 83.54%
+  - Anomaly F1-Score (-1)   : 89.31%
+  - WARNING Detection Rate  : 77.00%
+  - CRITICAL Detection Rate : 94.44%
+
+Key Operational Insights & Limitations:
+  - Isolation Forest achieves high recall on severe CRITICAL faults without requiring
+    any fault labels during training.
+  - Structural Limitation: Isolation Forest classifies whether an instance deviates
+    from normal operation, but it CANNOT inherently distinguish WARNING from CRITICAL.
+    Therefore, a hybrid pipeline (Isolation Forest for anomaly alerting + Random Forest
+    for multi-class fault classification) provides the optimal engineering solution.
+================================================================================

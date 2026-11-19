@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Industrial Predictive Maintenance Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Chart.js for High-Performance Time-Series Plots -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    
+    <!-- Firebase JavaScript Web SDK (v9 Compat for Pure Vanilla HTML/JS) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+    <!-- Header & Control Bar -->
+    <header class="dashboard-header">
+        <div class="brand-section">
+            <h1 class="brand-title">
+                <span class="brand-icon">⚙</span> Industrial Predictive Maintenance
+            </h1>
+            <p class="brand-subtitle">ESP32 Condition Monitoring & AI-Driven Anomaly Detection</p>
+        </div>
+
+        <div class="controls-section">
+            <!-- Dynamic Device Selector -->
+            <div class="device-picker">
+                <label for="deviceSelect">Monitored Node:</label>
+                <select id="deviceSelect" class="device-select">
+                    <option value="">Discovering Devices...</option>
+                </select>
+            </div>
+
+            <!-- Connection & Heartbeat Status Indicators -->
+            <div class="status-badges">
+                <div id="connectionPill" class="pill pill-offline">
+                    <span class="pill-dot"></span>
+                    <span id="connectionText">CONNECTING...</span>
+                </div>
+                <div id="heartbeatPill" class="pill pill-heartbeat-stale">
+                    <span class="pill-dot"></span>
+                    <span id="heartbeatText">STANDBY</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Top Urgent Alert Banner (Dynamically shown on Warning or Critical state) -->
+    <div id="systemAlertBanner" class="system-alert-banner">
+        <span id="alertBannerText">System Operating Under Normal Baseline Parameters.</span>
+    </div>
+
+    <!-- Main Content Area -->
+    <main>
+        <!-- Section 1: Overview & AI/ML Analytics -->
+        <section class="ai-overview-grid">
+            <!-- 1. Machine Health Condition Banner Card -->
+            <div id="conditionCard" class="card condition-card state-NORMAL">
+                <div class="card-title">
+                    <span>Machine Condition</span>
+                    <span>AI Model</span>
+                </div>
+                <div id="conditionBadge" class="condition-badge-large badge-NORMAL">CONNECTING</div>
+                <div id="diagnosticSummary" class="diagnostic-text">Synchronizing real-time telemetry from Firebase...</div>
+            </div>
+
+            <!-- 2. Random Forest Classification Probabilities -->
+            <div class="card">
+                <div class="card-title">
+                    <span>Random Forest Probabilities</span>
+                    <span>Multi-Class</span>
+                </div>
+                <div class="prob-bars-container">
+                    <div class="prob-row">
+                        <div class="prob-label-row">
+                            <span style="color: var(--color-normal)">NORMAL</span>
+                            <span id="valNormal">--%</span>
+                        </div>
+                        <div class="prob-bar-track">
+                            <div id="probNormal" class="prob-bar-fill fill-normal" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="prob-row">
+                        <div class="prob-label-row">
+                            <span style="color: var(--color-warning)">WARNING</span>
+                            <span id="valWarning">--%</span>
+                        </div>
+                        <div class="prob-bar-track">
+                            <div id="probWarning" class="prob-bar-fill fill-warning" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="prob-row">
+                        <div class="prob-label-row">
+                            <span style="color: var(--color-critical)">CRITICAL</span>
+                            <span id="valCritical">--%</span>
+                        </div>
+                        <div class="prob-bar-track">
+                            <div id="probCritical" class="prob-bar-fill fill-critical" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Isolation Forest Anomaly Detection -->
+            <div class="card">
+                <div class="card-title">
+                    <span>Isolation Forest Anomaly</span>
+                    <span>Unsupervised</span>
+                </div>
+                <div id="anomalyStatusBadge" class="anomaly-value anomaly-inlier">STANDBY</div>
+                <div class="anomaly-score-meta">
+                    Decision Score: <span id="anomalyScoreVal" class="score-highlight">--</span>
+                    <span style="display:block; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem;">
+                        (Negative indicates statistical anomaly divergence)
+                    </span>
+                </div>
+            </div>
+
+            <!-- 4. Telemetry Telemetry Timestamp & Node Info -->
+            <div class="card">
+                <div class="card-title">
+                    <span>Device Metadata</span>
+                    <span>ESP32</span>
+                </div>
+                <div style="margin-top: 0.5rem; font-size: 0.875rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
+                        <span style="color: var(--text-secondary)">Target Node:</span>
+                        <strong id="selectedDeviceId" style="color: var(--accent-cyan); font-family: monospace;">--</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
+                        <span style="color: var(--text-secondary)">Last Transmission:</span>
+                        <strong id="telemetryTime">--:--:--</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-secondary)">Sampling Cadence:</span>
+                        <span style="color: var(--text-muted)">1s Read / 2s Stream</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Sensor Telemetry Live Gauges -->
+        <h2 class="section-heading">
+            <span class="heading-dot"></span> Real-Time Sensor Telemetry
+        </h2>
+
+        <section class="sensor-metrics-grid">
+            <!-- Temperature -->
+            <div class="card">
+                <div class="card-title">
+                    <span>Temperature (DHT22)</span>
+                    <span style="color: var(--color-warning)">⚠️ 45°C</span>
+                </div>
+                <div class="metric-big">
+                    <span id="tempVal">--</span><span class="metric-unit">°C</span>
+                </div>
+                <div class="metric-subtext">
+                    <span>Ambient Thermal State</span>
+                    <span>Crit: ≥60°C</span>
+                </div>
+            </div>
+
+            <!-- Humidity -->
+            <div class="card">
+                <div class="card-title">
+                    <span>Relative Humidity</span>
+                    <span>DHT22</span>
+                </div>
+                <div class="metric-big">
+                    <span id="humVal">--</span><span class="metric-unit">%</span>
+                </div>
+                <div class="metric-subtext">
+                    <span>Atmospheric Moisture</span>
+                    <span>Range: 0-100%</span>
+                </div>
+            </div>
+
+            <!-- Dynamic Vibration Magnitude -->
+            <div class="card">
+                <div class="card-title">
+                    <span>Vibration Mag (MPU6050)</span>
+                    <span style="color: var(--color-warning)">⚠️ 2.5 m/s²</span>
+                </div>
+                <div class="metric-big">
+                    <span id="vibMagVal">--</span><span class="metric-unit">m/s²</span>
+                </div>
+                <div class="metric-subtext">
+                    <span>Kinematic Dynamic Vibration</span>
+                    <span>Crit: ≥5.0 m/s²</span>
+                </div>
+            </div>
+
+            <!-- Total Acceleration -->
+            <div class="card">
+                <div class="card-title">
+                    <span>Total Acceleration</span>
+                    <span id="totAccelG" style="color: var(--accent-cyan); font-size: 0.75rem;">(1.00 g)</span>
+                </div>
+                <div class="metric-big">
+                    <span id="totAccelVal">--</span><span class="metric-unit">m/s²</span>
+                </div>
+                <div class="metric-subtext">
+                    <span>Vector Norm: √(ax²+ay²+az²)</span>
+                    <span>1g Ref: 9.81</span>
+                </div>
+            </div>
+
+            <!-- 3-Axis Kinematic Vector -->
+            <div class="card">
+                <div class="card-title">
+                    <span>3-Axis Kinematics (MPU6050)</span>
+                    <span>m/s²</span>
+                </div>
+                <div class="axis-breakdown">
+                    <div class="axis-item">
+                        <span class="axis-tag">ACCEL X</span>
+                        <span id="accelX" class="axis-num">--</span>
+                    </div>
+                    <div class="axis-item">
+                        <span class="axis-tag">ACCEL Y</span>
+                        <span id="accelY" class="axis-num">--</span>
+                    </div>
+                    <div class="axis-item">
+                        <span class="axis-tag">ACCEL Z</span>
+                        <span id="accelZ" class="axis-num">--</span>
+                    </div>
+                </div>
+                <div class="metric-subtext" style="margin-top: 0.4rem;">
+                    <span>X: Radial / Y: Radial / Z: Axial (1g)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Historical Time-Series Charts (Chart.js) -->
+        <h2 class="section-heading">
+            <span class="heading-dot" style="background: var(--accent-blue)"></span> Telemetry Analytics & Trends
+        </h2>
+
+        <section class="charts-grid">
+            <!-- Thermal Trends Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Thermal Dynamics History (DHT22)</h3>
+                    <span style="font-size: 0.75rem; color: var(--text-muted)">Live Rolling Window</span>
+                </div>
+                <div class="chart-canvas-wrapper">
+                    <canvas id="thermalChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Vibration Trends Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Vibration Dynamics History (MPU6050)</h3>
+                    <span style="font-size: 0.75rem; color: var(--text-muted)">m/s² Rolling Window</span>
+                </div>
+                <div class="chart-canvas-wrapper">
+                    <canvas id="vibrationChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Full Width Machine Health & Anomaly Timeline -->
+            <div class="chart-card chart-card-full">
+                <div class="chart-header">
+                    <h3 class="chart-title">Machine Health Condition & Anomaly Timeline</h3>
+                    <span style="font-size: 0.75rem; color: var(--text-muted)">Stepped Condition History</span>
+                </div>
+                <div class="chart-canvas-wrapper" style="height: 180px;">
+                    <canvas id="conditionChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Maintenance Alerts & Anomaly Audit Log -->
+        <h2 class="section-heading">
+            <span class="heading-dot" style="background: var(--color-warning)"></span> Maintenance Alerts & Fault History
+        </h2>
+
+        <section class="alerts-card">
+            <div class="alerts-header">
+                <h3 class="chart-title">Recent Warning & Critical Incident Log</h3>
+                <span style="font-size: 0.75rem; color: var(--text-muted)">Source: Firebase Realtime Database Records</span>
+            </div>
+            <div class="table-wrapper">
+                <table class="alerts-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Condition</th>
+                            <th>Sensor Telemetry</th>
+                            <th>Anomaly Score</th>
+                            <th>Diagnostic Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alertsTableBody">
+                        <tr>
+                            <td colspan="5" class="empty-table-msg">Loading historical telemetry records...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+        <div>
+            Final Year Engineering Project: <strong>IoT-Based Industrial Predictive Maintenance System</strong>
+        </div>
+        <div>
+            Stack: ESP32 • Wokwi • HiveMQ MQTT • Python AI/ML (Random Forest & Isolation Forest) • Firebase Cloud
+        </div>
+    </footer>
+
+    <!-- Application Controller Scripts -->
+    <script src="js/firebase_config.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+{
+  "project": "IoT-Based Industrial Predictive Maintenance System",
+  "random_state": 42,
+  "features": [
+    "temperature",
+    "humidity",
+    "accel_x",
+    "accel_y",
+    "accel_z",
+    "total_accel",
+    "vibration_mag",
+    "radial_accel",
+    "axial_accel_dev",
+    "radial_axial_ratio",
+    "temp_humidity_ratio",
+    "thermal_mechanical_stress"
+  ],
+  "dataset_audit": {
+    "total_rows": 6000,
+    "missing_values": 0,
+    "duplicate_rows": 0,
+    "class_distribution": {
+      "NORMAL": {
+        "count": 3600,
+        "percentage": 60.0
+      },
+      "WARNING": {
+        "count": 1500,
+        "percentage": 25.0
+      },
+      "CRITICAL": {
+        "count": 900,
+        "percentage": 15.0
+      }
+    },
+    "max_total_accel_discrepancy": 0.0105,
+    "max_vibration_mag_discrepancy": 0.0067,
+    "summary_by_class": {
+      "CRITICAL": {
+        "temp_mean": 59.79,
+        "temp_std": 15.36,
+        "temp_min": 32.49,
+        "temp_max": 87.21,
+        "vib_mean": 2.53,
+        "vib_std": 1.98,
+        "vib_min": 0.0,
+        "vib_max": 7.82
+      },
+      "NORMAL": {
+        "temp_mean": 32.0,
+        "temp_std": 2.74,
+        "temp_min": 25.56,
+        "temp_max": 38.43,
+        "vib_mean": 0.3,
+        "vib_std": 0.22,
+        "vib_min": 0.0,
+        "vib_max": 1.14
+      },
+      "WARNING": {
+        "temp_mean": 44.72,
+        "temp_std": 8.37,
+        "temp_min": 27.22,
+        "temp_max": 59.13,
+        "vib_mean": 0.63,
+        "vib_std": 0.48,
+        "vib_min": 0.0,
+        "vib_max": 2.92
+      }
+    }
+  },
+  "random_forest_metrics": {
+    "accuracy": 0.9975,
+    "precision_macro": 0.9966996699669967,
+    "recall_macro": 0.9944444444444445,
+    "f1_macro": 0.9955405047591176,
+    "confusion_matrix": [
+      [
+        720,
+        0,
+        0
+      ],
+      [
+        0,
+        300,
+        0
+      ],
+      [
+        0,
+        3,
+        177
+      ]
+    ],
+    "feature_importances": {
+      "temp_humidity_ratio": 0.221,
+      "humidity": 0.1951,
+      "temperature": 0.1638,
+      "radial_axial_ratio": 0.1452,
+      "radial_accel": 0.1422,
+      "thermal_mechanical_stress": 0.0549,
+      "total_accel": 0.0331,
+      "vibration_mag": 0.0201,
+      "accel_y": 0.0099,
+      "accel_x": 0.0088,
+      "axial_accel_dev": 0.0034,
+      "accel_z": 0.0025
+    }
+  },
+  "isolation_forest_metrics": {
+    "accuracy": 0.92,
+    "precision_anomaly": 0.9593301435406698,
+    "recall_anomaly": 0.8354166666666667,
+    "f1_anomaly": 0.8930957683741648,
+    "confusion_matrix_binary": [
+      [
+        703,
+        17
+      ],
+      [
+        79,
+        401
+      ]
+    ],
+    "warning_detection_rate": 0.77,
+    "critical_detection_rate": 0.9444,
+    "contamination": 0.02
+  }
+}

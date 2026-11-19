@@ -1,0 +1,543 @@
+/* ==============================================================================
+   Industrial Predictive Maintenance Dashboard - Theme & Component Styles
+   ============================================================================== */
+
+:root {
+    --bg-base: #0a0e17;
+    --bg-surface: #111827;
+    --bg-card: #1f2937;
+    --bg-card-hover: #283548;
+    --border-color: #374151;
+    --border-highlight: #4b5563;
+    
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+
+    --color-normal: #10b981;
+    --color-normal-bg: rgba(16, 185, 129, 0.15);
+    --color-warning: #f59e0b;
+    --color-warning-bg: rgba(245, 158, 11, 0.15);
+    --color-critical: #ef4444;
+    --color-critical-bg: rgba(239, 68, 68, 0.18);
+    
+    --accent-cyan: #06b6d4;
+    --accent-blue: #3b82f6;
+    --accent-purple: #8b5cf6;
+    
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font-sans);
+}
+
+body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 1.5rem;
+    line-height: 1.5;
+}
+
+/* ==========================================================
+   Header & Controls
+   ========================================================== */
+.dashboard-header {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem 1.75rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+.brand-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.brand-title .brand-icon {
+    color: var(--accent-cyan);
+}
+
+.brand-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 0.2rem;
+}
+
+.controls-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.device-picker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-card);
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.device-picker label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.device-select {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+}
+
+.status-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pill {
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.pill-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.pill-online {
+    background: var(--color-normal-bg);
+    color: var(--color-normal);
+    border: 1px solid var(--color-normal);
+}
+.pill-online .pill-dot { background: var(--color-normal); }
+
+.pill-offline {
+    background: rgba(107, 114, 128, 0.2);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+}
+.pill-offline .pill-dot { background: var(--text-muted); }
+
+.pill-heartbeat-live {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent-blue);
+    border: 1px solid var(--accent-blue);
+}
+.pill-heartbeat-live .pill-dot {
+    background: var(--accent-blue);
+    animation: pulse-dot 1.5s infinite;
+}
+
+.pill-heartbeat-stale {
+    background: var(--color-warning-bg);
+    color: var(--color-warning);
+    border: 1px solid var(--color-warning);
+}
+.pill-heartbeat-stale .pill-dot { background: var(--color-warning); }
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* ==========================================================
+   Alert Banner (Conditional)
+   ========================================================== */
+.system-alert-banner {
+    display: none;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    align-items: center;
+    justify-content: space-between;
+    animation: slideDown 0.3s ease;
+}
+.banner-critical {
+    display: flex;
+    background: var(--color-critical-bg);
+    border: 1px solid var(--color-critical);
+    color: var(--color-critical);
+}
+.banner-warning {
+    display: flex;
+    background: var(--color-warning-bg);
+    border: 1px solid var(--color-warning);
+    color: var(--color-warning);
+}
+
+/* ==========================================================
+   Overview & AI Analytics Section
+   ========================================================== */
+.ai-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem;
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.card:hover {
+    border-color: var(--border-highlight);
+}
+
+.card-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Machine Condition Card Special Styling */
+.condition-card {
+    border-left: 5px solid var(--color-normal);
+}
+.condition-card.state-NORMAL {
+    border-left-color: var(--color-normal);
+}
+.condition-card.state-WARNING {
+    border-left-color: var(--color-warning);
+    background: linear-gradient(135deg, var(--bg-surface) 80%, rgba(245, 158, 11, 0.08));
+}
+.condition-card.state-CRITICAL {
+    border-left-color: var(--color-critical);
+    background: linear-gradient(135deg, var(--bg-surface) 80%, rgba(239, 68, 68, 0.12));
+    animation: glow-critical 2s infinite;
+}
+
+@keyframes glow-critical {
+    0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+    50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+}
+
+.condition-badge-large {
+    display: inline-block;
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0.5rem 0 0.25rem 0;
+    letter-spacing: -0.01em;
+}
+.badge-NORMAL { color: var(--color-normal); }
+.badge-WARNING { color: var(--color-warning); }
+.badge-CRITICAL { color: var(--color-critical); }
+
+.diagnostic-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* Probabilities Progress Bars */
+.prob-bars-container {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.prob-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+.prob-label-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.prob-bar-track {
+    background: var(--bg-base);
+    height: 6px;
+    border-radius: 999px;
+    overflow: hidden;
+}
+.prob-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+.fill-normal { background: var(--color-normal); }
+.fill-warning { background: var(--color-warning); }
+.fill-critical { background: var(--color-critical); }
+
+/* Anomaly Detector Card */
+.anomaly-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0.5rem 0 0.25rem 0;
+}
+.anomaly-inlier { color: var(--color-normal); }
+.anomaly-outlier { color: var(--color-critical); }
+
+.anomaly-score-meta {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+.score-highlight {
+    font-family: monospace;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ==========================================================
+   Sensor Telemetry Metrics Grid
+   ========================================================== */
+.section-heading {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 1.5rem 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.section-heading .heading-dot {
+    width: 6px;
+    height: 18px;
+    background: var(--accent-cyan);
+    border-radius: 4px;
+}
+
+.sensor-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.metric-big {
+    font-size: 2.1rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+}
+.metric-unit {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 0.25rem;
+}
+
+.metric-subtext {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    display: flex;
+    justify-content: space-between;
+}
+
+/* 3-Axis Vector Breakdown */
+.axis-breakdown {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    background: var(--bg-base);
+    padding: 0.5rem;
+    border-radius: 6px;
+}
+.axis-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.axis-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+.axis-num {
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: monospace;
+}
+
+/* ==========================================================
+   Charts Section
+   ========================================================== */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.chart-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.chart-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.chart-canvas-wrapper {
+    position: relative;
+    height: 260px;
+    width: 100%;
+}
+
+/* Full Width Chart for Condition Timeline */
+.chart-card-full {
+    grid-column: 1 / -1;
+}
+
+/* ==========================================================
+   Alerts & Audit Table
+   ========================================================== */
+.alerts-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.alerts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.alerts-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    text-align: left;
+}
+
+.alerts-table th {
+    padding: 0.75rem 1rem;
+    background: var(--bg-base);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.alerts-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.alerts-table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.tag-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+.tag-CRITICAL {
+    background: var(--color-critical-bg);
+    color: var(--color-critical);
+}
+.tag-WARNING {
+    background: var(--color-warning-bg);
+    color: var(--color-warning);
+}
+
+.empty-table-msg {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 2rem 0;
+    font-size: 0.875rem;
+}
+
+/* ==========================================================
+   Footer
+   ========================================================== */
+.dashboard-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    body { padding: 1rem; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .dashboard-header { flex-direction: column; align-items: flex-start; }
+    .controls-section { width: 100%; justify-content: space-between; }
+}
